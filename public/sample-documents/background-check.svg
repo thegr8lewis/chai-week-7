@@ -1,0 +1,89 @@
+<svg width="800" height="1100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="800" height="1100" fill="#f0fdf4"/>
+  <rect x="20" y="20" width="760" height="1060" fill="white" stroke="#16a34a" stroke-width="4"/>
+
+  <!-- Header -->
+  <text x="400" y="70" font-family="Arial, sans-serif" font-size="26" font-weight="bold" text-anchor="middle" fill="#16a34a">
+    NATIONAL CRIMINAL BACKGROUND CHECK
+  </text>
+  <text x="400" y="105" font-family="Arial, sans-serif" font-size="20" text-anchor="middle" fill="#16a34a">
+    COMPREHENSIVE SCREENING REPORT
+  </text>
+
+  <!-- Shield icon -->
+  <path d="M 400 140 L 360 160 L 360 200 Q 360 240 400 260 Q 440 240 440 200 L 440 160 Z"
+        fill="none" stroke="#16a34a" stroke-width="3"/>
+  <text x="400" y="210" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#16a34a">
+    ✓
+  </text>
+
+  <!-- Subject Information -->
+  <rect x="60" y="280" width="680" height="180" fill="#f9fafb" stroke="#d1d5db" stroke-width="1"/>
+  <text x="100" y="315" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#1f2937">
+    Subject Name: Sarah Johnson
+  </text>
+  <text x="100" y="345" font-family="Arial, sans-serif" font-size="16" fill="#6b7280">
+    Date of Birth: [REDACTED]
+  </text>
+  <text x="100" y="375" font-family="Arial, sans-serif" font-size="16" fill="#6b7280">
+    SSN: XXX-XX-[REDACTED]
+  </text>
+  <text x="100" y="405" font-family="Arial, sans-serif" font-size="16" fill="#1f2937">
+    Report Date: January 5, 2025
+  </text>
+  <text x="100" y="435" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#16a34a">
+    Valid Through: January 5, 2026
+  </text>
+
+  <!-- Criminal History Check -->
+  <rect x="60" y="480" width="680" height="160" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+  <text x="100" y="515" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#16a34a">
+    CRIMINAL HISTORY CHECK: CLEAR ✓
+  </text>
+  <text x="120" y="550" font-family="Arial, sans-serif" font-size="15" fill="#1f2937">
+    • County Records: No records found
+  </text>
+  <text x="120" y="580" font-family="Arial, sans-serif" font-size="15" fill="#1f2937">
+    • State Records: No records found
+  </text>
+  <text x="120" y="610" font-family="Arial, sans-serif" font-size="15" fill="#1f2937">
+    • Federal Records: No records found • Sex Offender Registry: Not listed
+  </text>
+
+  <!-- Employment Verification -->
+  <text x="100" y="680" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#16a34a">
+    EMPLOYMENT VERIFICATION: VERIFIED ✓
+  </text>
+  <text x="120" y="710" font-family="Arial, sans-serif" font-size="15" fill="#1f2937">
+    • Previous employers contacted and verified
+  </text>
+  <text x="120" y="740" font-family="Arial, sans-serif" font-size="15" fill="#1f2937">
+    • All employment dates confirmed • Professional references checked
+  </text>
+
+  <!-- Education Verification -->
+  <text x="100" y="790" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#16a34a">
+    EDUCATION VERIFICATION: VERIFIED ✓
+  </text>
+  <text x="120" y="820" font-family="Arial, sans-serif" font-size="15" fill="#1f2937">
+    • Nursing degree confirmed • Licensure credentials verified
+  </text>
+
+  <!-- Result -->
+  <rect x="60" y="860" width="680" height="120" fill="#dcfce7" stroke="#16a34a" stroke-width="3"/>
+  <text x="400" y="900" font-family="Arial, sans-serif" font-size="24" font-weight="bold" text-anchor="middle" fill="#16a34a">
+    RESULT: APPROVED FOR EMPLOYMENT
+  </text>
+  <text x="400" y="935" font-family="Arial, sans-serif" font-size="18" text-anchor="middle" fill="#1f2937">
+    Risk Level: LOW • Recommended Action: CLEARED FOR HIRE
+  </text>
+
+  <!-- Footer -->
+  <text x="400" y="1010" font-family="Arial, sans-serif" font-size="14" text-anchor="middle" fill="#6b7280">
+    Report ID: BGC-2025-34567
+  </text>
+  <text x="400" y="1040" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#16a34a">
+    National Bureau of Investigation - Official Seal
+  </text>
+</svg>

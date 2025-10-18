@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { CheckCircle2, Clock, UserCheck, Briefcase, MessageSquare, FileText, Phone, Download, Eye } from "lucide-react"
+import { DocumentUploadOCR } from "@/components/document-upload-ocr"
 
 const timeline = [
   {
@@ -148,6 +149,7 @@ const documents = [
 export function CaregiverView() {
   const [selectedItem, setSelectedItem] = useState<(typeof timeline)[0] | null>(null)
   const [showDocuments, setShowDocuments] = useState(false)
+  const [showUploadOCR, setShowUploadOCR] = useState(false)
   const [actionDialog, setActionDialog] = useState<{ open: boolean; action: string }>({
     open: false,
     action: "",
@@ -426,7 +428,12 @@ export function CaregiverView() {
                   <p className="text-sm text-muted-foreground mb-4">
                     Upload additional certifications or update existing ones
                   </p>
-                  <Button className="bg-primary hover:bg-primary/90">Upload Document</Button>
+                  <Button
+                    className="bg-primary hover:bg-primary/90"
+                    onClick={() => setShowUploadOCR(true)}
+                  >
+                    Upload Document with OCR
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -448,6 +455,22 @@ export function CaregiverView() {
                 "Support team notified. A representative will call you within 30 minutes."}
             </DialogDescription>
           </DialogHeader>
+        </DialogContent>
+      </Dialog>
+
+      {/* OCR Upload Dialog */}
+      <Dialog open={showUploadOCR} onOpenChange={setShowUploadOCR}>
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-2xl">
+              <FileText className="w-6 h-6 text-primary" />
+              Upload Documents with OCR
+            </DialogTitle>
+            <DialogDescription>
+              Upload images of your certifications and we'll automatically extract the text
+            </DialogDescription>
+          </DialogHeader>
+          <DocumentUploadOCR />
         </DialogContent>
       </Dialog>
     </div>

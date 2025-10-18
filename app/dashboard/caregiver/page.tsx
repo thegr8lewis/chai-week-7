@@ -25,6 +25,7 @@ import {
   TrendingUp,
   Shield,
 } from "lucide-react"
+import { DocumentUploadOCR } from "@/components/document-upload-ocr"
 
 const timeline = [
   {
@@ -301,7 +302,7 @@ const documentAssessments = [
 
 export default function CaregiverDashboard() {
   const [selectedItem, setSelectedItem] = useState<(typeof timeline)[0] | null>(null)
-  const [showDocuments, setShowDocuments] = useState(false)
+  const [showUploadOCR, setShowUploadOCR] = useState(false)
   const [selectedClient, setSelectedClient] = useState<(typeof matchedClients)[0] | null>(null)
   const [actionDialog, setActionDialog] = useState<{ open: boolean; action: string }>({
     open: false,
@@ -310,18 +311,13 @@ export default function CaregiverDashboard() {
   const [selectedAssessment, setSelectedAssessment] = useState<(typeof documentAssessments)[0] | null>(null)
 
   const handleAction = (action: string) => {
-    if (action === "documents") {
-      setShowDocuments(true)
-      return
-    }
-
     setActionDialog({ open: true, action })
     setTimeout(() => {
       setActionDialog({ open: false, action: "" })
     }, 2000)
   }
 
-  const handleDownload = (docName: string) => {
+  const handleDownload = () => {
     const button = document.activeElement as HTMLButtonElement
     if (button) {
       button.textContent = "Downloaded!"
@@ -343,45 +339,6 @@ export default function CaregiverDashboard() {
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-foreground mb-2">Caregiver Dashboard</h1>
           <p className="text-muted-foreground">Track your applications, matches, and document status</p>
-        </div>
-
-        {/* Key Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <Card className="border-2 hover:shadow-lg transition-all duration-300 hover:scale-105">
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-primary mb-2">95%</div>
-                <div className="text-sm text-muted-foreground">Match Score</div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-2 hover:shadow-lg transition-all duration-300 hover:scale-105">
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-secondary mb-2">98</div>
-                <div className="text-sm text-muted-foreground">Trust Score</div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-2 hover:shadow-lg transition-all duration-300 hover:scale-105">
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-primary mb-2">3</div>
-                <div className="text-sm text-muted-foreground">Active Matches</div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-2 hover:shadow-lg transition-all duration-300 hover:scale-105">
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-primary mb-2">6/6</div>
-                <div className="text-sm text-muted-foreground">Documents Verified</div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
         {/* Tabs */}
@@ -627,7 +584,7 @@ export default function CaregiverDashboard() {
                           size="sm"
                           variant="outline"
                           className="gap-2 bg-transparent"
-                          onClick={() => handleDownload(doc.name)}
+                          onClick={() => handleDownload()}
                         >
                           <Download className="w-4 h-4" />
                         </Button>
@@ -649,7 +606,12 @@ export default function CaregiverDashboard() {
                   <p className="text-sm text-muted-foreground mb-4">
                     Upload additional certifications or update existing ones
                   </p>
-                  <Button className="bg-primary hover:bg-primary/90">Upload Document</Button>
+                  <Button
+                    className="bg-primary hover:bg-primary/90"
+                    onClick={() => setShowUploadOCR(true)}
+                  >
+                    Upload Document with OCR
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -958,17 +920,6 @@ export default function CaregiverDashboard() {
                   </div>
                 </div>
               </div>
-
-              <div className="flex gap-3 pt-4">
-                <Button className="flex-1 bg-primary hover:bg-primary/90">
-                  <Heart className="w-4 h-4 mr-2" />
-                  Apply to This Job
-                </Button>
-                <Button variant="outline" className="flex-1 border-primary/30 hover:bg-primary/10 bg-transparent">
-                  <MessageSquare className="w-4 h-4 mr-2" />
-                  Message
-                </Button>
-              </div>
             </div>
           )}
         </DialogContent>
@@ -1085,6 +1036,22 @@ export default function CaregiverDashboard() {
                 "Support team notified. A representative will call you within 30 minutes."}
             </DialogDescription>
           </DialogHeader>
+        </DialogContent>
+      </Dialog>
+
+      {/* OCR Upload Dialog */}
+      <Dialog open={showUploadOCR} onOpenChange={setShowUploadOCR}>
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-2xl">
+              <FileText className="w-6 h-6 text-primary" />
+              Upload Documents with OCR
+            </DialogTitle>
+            <DialogDescription>
+              Upload images of your certifications and we'll automatically extract the text
+            </DialogDescription>
+          </DialogHeader>
+          <DocumentUploadOCR />
         </DialogContent>
       </Dialog>
     </div>
