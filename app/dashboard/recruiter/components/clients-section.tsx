@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { DialogDescription } from "@/components/ui/dialog"
 import { Progress } from "@/components/ui/progress"
-import { Brain, Calendar, Heart, MapPin, Star, Video, AlertCircle, Loader2, Search, Filter, Settings, CheckCircle2, Check, X, Sparkles, BadgeCheck, Clock, ChevronDown, ChevronUp } from "lucide-react"
+import { Brain, Calendar, Heart, MapPin, Star, Video, AlertCircle, Loader2, Search, Filter, Settings, CheckCircle2, Check, X, Sparkles, BadgeCheck, Clock, ChevronDown, ChevronUp, FileText } from "lucide-react"
 import { caregiverData, clientData } from "@/lib/mock-data"
 import { MegaDialog } from "@/components/ui/mega-dialog"
 import { useToast } from "@/hooks/use-toast"
@@ -156,7 +156,7 @@ export function ClientsSection({ onViewProfile, onScheduleInterview, onSendOffer
         onOpenChange={() => setSelectedClientId(null)}
         size={analysisId ? "fullscreen" : "ultra"}
         title={<span className="flex items-center gap-2"><Brain className="w-5 h-5 text-primary" /> AI Matching</span>}
-        description={<DialogDescription>Agentic workflow running, then top caregiver matches</DialogDescription>}
+        description={"Agentic workflow running, then top caregiver matches"}
         headerExtra={isMatching ? <Loader2 className="w-5 h-5 animate-spin text-primary" /> : <BadgeCheck className="w-5 h-5 text-primary" />}
       >
           <div className="space-y-6">
@@ -324,9 +324,9 @@ export function ClientsSection({ onViewProfile, onScheduleInterview, onSendOffer
                       )}
 
                       <div className="flex gap-3 pt-2">
-                        <Button className="flex-1 bg-primary hover:bg-primary/90">
-                          <Video className="w-4 h-4 mr-2" />
-                          Start Meeting
+                        <Button className="flex-1 bg-primary hover:bg-primary/90" onClick={() => analysisId && onViewProfile ? onViewProfile(analysisId) : undefined}>
+                          <FileText className="w-4 h-4 mr-2" />
+                          View Full Profile
                         </Button>
                       </div>
                     </CardContent>

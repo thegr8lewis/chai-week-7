@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useMemo, useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { LayoutDashboard, Link2, Users, Building2 } from "lucide-react"
 import {
   availablePlatforms,
@@ -17,7 +18,6 @@ import { OverviewSection } from "./components/overview-section"
 import { PlatformsSection } from "./components/platforms-section"
 import { ApplicantsSection } from "./components/applicants-section"
 import { ConnectPlatformDialog } from "./components/connect-platform-dialog"
-import { CandidateProfileDialog } from "./components/candidate-profile-dialog"
 import { ClientsSection } from "./components/clients-section"
 import type { Candidate, SidebarItem } from "./types"
 
@@ -29,12 +29,25 @@ const sidebarItems: SidebarItem[] = [
 ]
 
 export default function RecruiterDashboard() {
+  const router = useRouter()
+  const search = useSearchParams()
   const [candidates, setCandidates] = useState(initialApplicants)
-  const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null)
   const [filterSource, setFilterSource] = useState("all")
   const [searchTerm, setSearchTerm] = useState("")
   const [showConnectDialog, setShowConnectDialog] = useState(false)
-  const [activeSection, setActiveSection] = useState<SidebarItem["id"]>("overview")
+  const initialSection = (search.get("section") as SidebarItem["id"]) || "overview"
+  const [activeSection, setActiveSection] = useState<SidebarItem["id"]>(initialSection)
+
+  // Keep URL in sync when section changes
+  useEffect(() => {
+    const current = search.get("section")
+    if (current !== activeSection) {
+      const params = new URLSearchParams(Array.from(search.entries()))
+      params.set("section", activeSection)
+      router.replace(`/dashboard/recruiter?${params.toString()}`)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeSection])
 
   const filteredCandidates = candidates.filter((candidate) => {
     const matchesSource = filterSource === "all" || candidate.source === filterSource
@@ -56,7 +69,6 @@ export default function RecruiterDashboard() {
           : candidate,
       ),
     )
-    setSelectedCandidate(null)
   }
 
   const handleSendOffer = (candidateId: Candidate["id"]) => {
@@ -70,7 +82,6 @@ export default function RecruiterDashboard() {
           : candidate,
       ),
     )
-    setSelectedCandidate(null)
   }
 
   const metrics = {
@@ -113,13 +124,21 @@ export default function RecruiterDashboard() {
                 filterSource={filterSource}
                 onSearchChange={setSearchTerm}
                 onFilterChange={setFilterSource}
-                onViewProfile={setSelectedCandidate}
+                onViewProfile={(candidate: Candidate) =>
+                  router.push(`/dashboard/recruiter/candidate/${candidate.id}?from=applicants`)
+                }
                 onScheduleInterview={handleScheduleInterview}
                 onSendOffer={handleSendOffer}
               />
             )}
 
-            {activeSection === "clients" && <ClientsSection />}
+            {activeSection === "clients" && (
+              <ClientsSection
+                onViewProfile={(id: number) => router.push(`/dashboard/recruiter/candidate/${id}?from=clients`)}
+                onScheduleInterview={handleScheduleInterview}
+                onSendOffer={handleSendOffer}
+              />
+            )}
           </div>
         </main>
       </div>
@@ -130,12 +149,7 @@ export default function RecruiterDashboard() {
         platforms={availablePlatforms}
       />
 
-      <CandidateProfileDialog
-        candidate={selectedCandidate}
-        onClose={() => setSelectedCandidate(null)}
-        onScheduleInterview={handleScheduleInterview}
-        onSendOffer={handleSendOffer}
-      />
+      {/* CandidateProfileDialog removed: navigates to dedicated route now */}
     </div>
   )
 }
