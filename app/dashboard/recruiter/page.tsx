@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { LayoutDashboard, Link2, Users } from "lucide-react"
+import { LayoutDashboard, Link2, Users, Building2 } from "lucide-react"
 import {
   availablePlatforms,
   applicantTrendData,
@@ -18,12 +18,14 @@ import { PlatformsSection } from "./components/platforms-section"
 import { ApplicantsSection } from "./components/applicants-section"
 import { ConnectPlatformDialog } from "./components/connect-platform-dialog"
 import { CandidateProfileDialog } from "./components/candidate-profile-dialog"
+import { ClientsSection } from "./components/clients-section"
 import type { Candidate, SidebarItem } from "./types"
 
 const sidebarItems: SidebarItem[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "platforms", label: "Job Platforms", icon: Link2 },
   { id: "applicants", label: "Applicants", icon: Users },
+  { id: "clients", label: "Clients", icon: Building2 },
 ]
 
 export default function RecruiterDashboard() {
@@ -116,6 +118,8 @@ export default function RecruiterDashboard() {
                 onSendOffer={handleSendOffer}
               />
             )}
+
+            {activeSection === "clients" && <ClientsSection />}
           </div>
         </main>
       </div>
