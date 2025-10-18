@@ -29,7 +29,11 @@ interface UploadedFile {
   error?: string
 }
 
-export function DocumentUploadOCR() {
+interface DocumentUploadOCRProps {
+  onSubmit?: (files: UploadedFile[]) => void
+}
+
+export function DocumentUploadOCR({ onSubmit }: DocumentUploadOCRProps = {}) {
   const [files, setFiles] = useState<UploadedFile[]>([])
   const [isDragging, setIsDragging] = useState(false)
   const [selectedFile, setSelectedFile] = useState<UploadedFile | null>(null)
@@ -142,6 +146,17 @@ export function DocumentUploadOCR() {
   const completedFiles = files.filter((f) => f.status === "completed").length
   const processingFiles = files.filter((f) => f.status === "processing").length
   const errorFiles = files.filter((f) => f.status === "error").length
+
+  const handleSubmit = () => {
+    const completedFilesList = files.filter((f) => f.status === "completed")
+
+    if (onSubmit) {
+      onSubmit(completedFilesList)
+    }
+
+    // Clear files after submission
+    setFiles([])
+  }
 
   return (
     <div className="space-y-6">
@@ -339,6 +354,28 @@ export function DocumentUploadOCR() {
             ))}
           </CardContent>
         </Card>
+      )}
+
+      {/* Submit Button - Show only when there are completed files */}
+      {completedFiles > 0 && (
+        <div className="flex justify-end gap-3">
+          <Button
+            variant="outline"
+            onClick={() => setFiles([])}
+            className="gap-2"
+          >
+            <X className="w-4 h-4" />
+            Clear All
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            className="bg-gradient-to-r from-primary to-secondary hover:shadow-lg text-white gap-2"
+            disabled={processingFiles > 0}
+          >
+            <CheckCircle2 className="w-4 h-4" />
+            Submit {completedFiles} Document{completedFiles !== 1 ? 's' : ''}
+          </Button>
+        </div>
       )}
 
       {/* View Full Text Dialog */}

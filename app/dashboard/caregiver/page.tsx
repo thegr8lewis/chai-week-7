@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -26,6 +26,19 @@ import {
   Shield,
 } from "lucide-react"
 import { DocumentUploadOCR } from "@/components/document-upload-ocr"
+
+interface Document {
+  id: number
+  name: string
+  type: string
+  status: string
+  uploadDate: string
+  expiryDate: string
+  verifiedBy: string
+  fileSize: string
+  color: string
+  bgColor: string
+}
 
 const timeline = [
   {
@@ -78,7 +91,7 @@ const timeline = [
   },
 ]
 
-const documents = [
+const initialDocuments: Document[] = [
   {
     id: 1,
     name: "Nursing License",
@@ -309,6 +322,45 @@ export default function CaregiverDashboard() {
     action: "",
   })
   const [selectedAssessment, setSelectedAssessment] = useState<(typeof documentAssessments)[0] | null>(null)
+  const [documents, setDocuments] = useState<Document[]>([])
+
+  // Load documents from localStorage on mount
+  useEffect(() => {
+    const savedDocs = localStorage.getItem("caregiver_documents")
+    if (savedDocs) {
+      setDocuments(JSON.parse(savedDocs))
+    } else {
+      setDocuments(initialDocuments)
+      localStorage.setItem("caregiver_documents", JSON.stringify(initialDocuments))
+    }
+  }, [])
+
+  // Handle document submission from OCR
+  const handleDocumentSubmit = (uploadedFiles: any[]) => {
+    const newDocuments = uploadedFiles.map((file, index) => ({
+      id: documents.length + index + 1,
+      name: file.file.name.replace(/\.[^/.]+$/, ""),
+      type: "Uploaded Document",
+      status: "Processing",
+      uploadDate: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      expiryDate: "N/A",
+      verifiedBy: "Pending Verification",
+      fileSize: `${(file.file.size / 1024).toFixed(2)} KB`,
+      color: "text-blue-500",
+      bgColor: "bg-blue-50",
+    }))
+
+    const updatedDocs = [...newDocuments, ...documents]
+    setDocuments(updatedDocs)
+    localStorage.setItem("caregiver_documents", JSON.stringify(updatedDocs))
+    setShowUploadOCR(false)
+
+    // Show success message
+    setActionDialog({ open: true, action: "upload" })
+    setTimeout(() => {
+      setActionDialog({ open: false, action: "" })
+    }, 2000)
+  }
 
   const handleAction = (action: string) => {
     setActionDialog({ open: true, action })
@@ -1034,6 +1086,8 @@ export default function CaregiverDashboard() {
                 "Your message has been sent to your recruiter. They will respond within 24 hours."}
               {actionDialog.action === "support" &&
                 "Support team notified. A representative will call you within 30 minutes."}
+              {actionDialog.action === "upload" &&
+                "Documents uploaded successfully! They will appear in your Documents tab and are being processed for verification."}
             </DialogDescription>
           </DialogHeader>
         </DialogContent>
@@ -1051,7 +1105,7 @@ export default function CaregiverDashboard() {
               Upload images of your certifications and we'll automatically extract the text
             </DialogDescription>
           </DialogHeader>
-          <DocumentUploadOCR />
+          <DocumentUploadOCR onSubmit={handleDocumentSubmit} />
         </DialogContent>
       </Dialog>
     </div>
