@@ -77,3 +77,42 @@ export interface SidebarItem {
   label: string
   icon: IconComponent
 }
+
+export type CandidatePipelineStatus = "New" | "Filtered" | "Ready" | "Imported"
+
+export interface PlatformCandidate {
+  id: number
+  name: string
+  role: string
+  experience: string
+  location: string
+  specialty: string
+  availability: string
+  matchScore: number
+  status: CandidatePipelineStatus
+}
+
+export type PlatformFilterType = "include" | "exclude" | "limit"
+
+export interface PlatformFilterRule {
+  id: string
+  label: string
+  description: string
+  type: PlatformFilterType
+  value: string
+}
+
+export interface PlatformIntegration {
+  platformId: JobSource["id"]
+  lastSync: string
+  nextSync: string
+  completionStep: number
+  filters: PlatformFilterRule[]
+  candidates: PlatformCandidate[]
+}
+
+export interface IntegrationWorkflowStep {
+  id: number
+  title: string
+  description: string
+}

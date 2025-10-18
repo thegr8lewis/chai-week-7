@@ -6,7 +6,9 @@ import {
   availablePlatforms,
   applicantTrendData,
   applicants as initialApplicants,
+  integrationWorkflowSteps,
   jobSources,
+  platformIntegrations,
   recentActivityData,
   sourceDistributionData,
 } from "./data"
@@ -93,7 +95,12 @@ export default function RecruiterDashboard() {
             )}
 
             {activeSection === "platforms" && (
-              <PlatformsSection jobSources={jobSources} onConnectClick={() => setShowConnectDialog(true)} />
+              <PlatformsSection
+                jobSources={jobSources}
+                integrations={platformIntegrations}
+                workflowSteps={integrationWorkflowSteps}
+                onConnectClick={() => setShowConnectDialog(true)}
+              />
             )}
 
             {activeSection === "applicants" && (
