@@ -1,6 +1,6 @@
 "use client"
 
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { DialogDescription } from "@/components/ui/dialog"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -16,6 +16,7 @@ import {
   Star,
 } from "lucide-react"
 import type { Candidate } from "../types"
+import { MegaDialog } from "@/components/ui/mega-dialog"
 
 interface CandidateProfileDialogProps {
   candidate: Candidate | null
@@ -37,13 +38,14 @@ export function CandidateProfileDialog({
   }
 
   return (
-    <Dialog open={!!candidate} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-2xl">Candidate Profile</DialogTitle>
-          <DialogDescription>Complete information and credentials</DialogDescription>
-        </DialogHeader>
-        {candidate && (
+    <MegaDialog
+      open={!!candidate}
+      onOpenChange={handleOpenChange}
+      size="wide"
+      title={<span className="text-2xl">Candidate Profile</span>}
+      description={<DialogDescription>Complete information and credentials</DialogDescription>}
+    >
+      {candidate && (
           <div className="space-y-6">
             <div className="flex items-start gap-6">
               <Avatar className="w-24 h-24 border-4 border-primary/20">
@@ -170,7 +172,6 @@ export function CandidateProfileDialog({
             </div>
           </div>
         )}
-      </DialogContent>
-    </Dialog>
+    </MegaDialog>
   )
 }

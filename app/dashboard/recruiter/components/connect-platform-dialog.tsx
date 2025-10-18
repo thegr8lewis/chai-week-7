@@ -15,7 +15,7 @@ interface ConnectPlatformDialogProps {
 export function ConnectPlatformDialog({ open, onOpenChange, platforms }: ConnectPlatformDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="max-w-5xl">
         <DialogHeader>
           <DialogTitle className="text-2xl flex items-center gap-2">
             <Plus className="w-6 h-6 text-primary" />
