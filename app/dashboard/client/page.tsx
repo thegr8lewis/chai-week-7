@@ -19,7 +19,6 @@ import {
   MessageSquare,
   Video,
   Brain,
-  CheckCircle2,
   AlertCircle,
 } from "lucide-react"
 
@@ -206,7 +205,7 @@ export default function ClientDashboard() {
 
         {/* Tabs */}
         <Tabs defaultValue="caregivers" className="w-full">
-          <TabsList className="grid w-full grid-cols-5 bg-muted/50 p-1 rounded-xl">
+          <TabsList className="grid w-full grid-cols-4 bg-muted/50 p-1 rounded-xl">
             <TabsTrigger 
               value="caregivers" 
               className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg transition-all duration-300 rounded-lg"
@@ -231,12 +230,7 @@ export default function ClientDashboard() {
             >
               Preferences
             </TabsTrigger>
-            <TabsTrigger 
-              value="interviews" 
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg transition-all duration-300 rounded-lg"
-            >
-              Interviews
-            </TabsTrigger>
+            
           </TabsList>
 
           {/* Caregivers Tab */}
@@ -367,42 +361,59 @@ export default function ClientDashboard() {
                 {matchingAnalysis.map((analysis, index) => (
                   <Card
                     key={analysis.id}
-                    className="border-2 hover:shadow-lg transition-all duration-300 cursor-pointer hover:border-primary/50 animate-in fade-in slide-in-from-bottom"
+                    className="border hover:shadow-md transition-all duration-300 cursor-pointer hover:border-primary/40 animate-in fade-in slide-in-from-bottom"
                     style={{ animationDelay: `${index * 50}ms` }}
                     onClick={() => setSelectedMatching(analysis)}
                   >
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <CardTitle className="text-base">{analysis.caregiver}</CardTitle>
-                          <CardDescription className="text-xs">Click to view detailed analysis</CardDescription>
+                        <div className="flex-1 flex items-start gap-3">
+                          <Avatar className="w-10 h-10 border-2 border-primary/20">
+                            <AvatarImage
+                              src={(matchedCaregivers.find((c) => c.name === analysis.caregiver)?.avatar) || "/placeholder.svg"}
+                              alt={analysis.caregiver}
+                            />
+                            <AvatarFallback className="bg-primary/10 text-primary">
+                              {analysis.caregiver.charAt(0)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <CardTitle className="text-base">{analysis.caregiver}</CardTitle>
+                            <CardDescription className="text-xs">
+                              {(matchedCaregivers.find((c) => c.name === analysis.caregiver)?.role) || "Caregiver"}
+                              {" • "}
+                              {(matchedCaregivers.find((c) => c.name === analysis.caregiver)?.location) || "Location N/A"}
+                            </CardDescription>
+                          </div>
                         </div>
                         <div className="text-right">
+                          <div className="text-[10px] uppercase text-muted-foreground tracking-wide">Match</div>
                           <div className="text-2xl font-bold text-primary">{analysis.matchScore}%</div>
-                          <Badge className="bg-primary/10 text-primary text-xs">{analysis.recommendedAction}</Badge>
+                          <Badge className="bg-primary/10 text-primary text-xs mt-1">{analysis.recommendedAction}</Badge>
                         </div>
                       </div>
                     </CardHeader>
 
                     <CardContent className="space-y-3">
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-muted-foreground">Overall Compatibility</span>
-                          <span className="font-semibold">{analysis.matchScore}%</span>
+                      <div className="space-y-1">
+                        <p className="text-xs font-semibold text-muted-foreground">Top Factors</p>
+                        <div className="flex flex-wrap gap-2">
+                          {analysis.compatibilityFactors.slice(0, 3).map((factor) => (
+                            <span
+                              key={factor.factor}
+                              className="px-2 py-1 rounded-full border bg-muted text-foreground text-[11px]"
+                              title={`${factor.factor}: ${factor.score}%`}
+                            >
+                              {factor.factor}: {factor.score}%
+                            </span>
+                          ))}
                         </div>
-                        <Progress value={analysis.matchScore} className="h-2" />
                       </div>
 
-                      <div className="grid grid-cols-3 gap-2">
-                        {analysis.compatibilityFactors.slice(0, 3).map((factor) => (
-                          <div key={factor.factor} className="p-2 bg-muted rounded-lg">
-                            <p className="text-xs text-muted-foreground truncate">{factor.factor}</p>
-                            <p className="text-sm font-semibold text-foreground">{factor.score}%</p>
-                          </div>
-                        ))}
-                      </div>
-
-                      <p className="text-sm text-muted-foreground line-clamp-2">{analysis.aiInsights}</p>
+                      <p className="text-sm text-muted-foreground line-clamp-2">
+                        <span className="font-medium text-foreground">Insight: </span>
+                        {analysis.aiInsights}
+                      </p>
 
                       {analysis.riskFactors.length > 0 && (
                         <div className="flex items-start gap-2 p-2 bg-secondary/10 rounded-lg">
@@ -411,16 +422,7 @@ export default function ClientDashboard() {
                         </div>
                       )}
 
-                      <Button
-                        variant="outline"
-                        className="w-full text-xs border-primary/30 hover:bg-primary/10 bg-transparent"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setSelectedMatching(analysis)
-                        }}
-                      >
-                        View Full Analysis
-                      </Button>
+                      <p className="text-[11px] text-muted-foreground">Tap to view details</p>
                     </CardContent>
                   </Card>
                 ))}
@@ -472,20 +474,10 @@ export default function ClientDashboard() {
                     <div className="flex gap-2">
                       <Button
                         size="sm"
-                        variant="outline"
-                        className="border-primary/30 hover:bg-primary/10 bg-transparent"
-                        onClick={() => setSelectedSchedule(schedule)}
+                        className="bg-primary hover:bg-primary/90"
                       >
                         <Video className="w-4 h-4 mr-1" />
-                        Schedule Interview
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="border-primary/30 hover:bg-primary/10 bg-transparent"
-                      >
-                        <MessageSquare className="w-4 h-4 mr-1" />
-                        Message
+                        Join Meeting
                       </Button>
                     </div>
                   </div>
@@ -550,45 +542,7 @@ export default function ClientDashboard() {
             </Card>
           </TabsContent>
 
-          {/* Interviews Tab */}
-          <TabsContent value="interviews" className="space-y-6">
-            <Card className="border-2">
-              <CardHeader>
-                <CardTitle>Schedule Interviews</CardTitle>
-                <CardDescription>Interview with matched caregivers before hiring</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {matchedCaregivers.map((caregiver, index) => (
-                  <div
-                    key={caregiver.id}
-                    className="p-4 border-2 rounded-lg hover:shadow-lg transition-all animate-in fade-in slide-in-from-left"
-                    style={{ animationDelay: `${index * 100}ms` }}
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-start gap-3">
-                        <Avatar className="w-12 h-12 border-2 border-primary/20">
-                          <AvatarImage src={caregiver.avatar || "/placeholder.svg"} alt={caregiver.name} />
-                          <AvatarFallback className="bg-primary/10 text-primary">
-                            {caregiver.name.charAt(0)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <h4 className="font-semibold text-foreground">{caregiver.name}</h4>
-                          <p className="text-sm text-muted-foreground">{caregiver.role}</p>
-                        </div>
-                      </div>
-                      <Badge className="bg-primary text-primary-foreground">{caregiver.matchScore}% Match</Badge>
-                    </div>
-
-                    <Button className="w-full bg-primary hover:bg-primary/90">
-                      <Video className="w-4 h-4 mr-2" />
-                      Schedule Video Interview
-                    </Button>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          </TabsContent>
+          
         </Tabs>
       </div>
 
@@ -653,11 +607,7 @@ export default function ClientDashboard() {
               <div className="flex gap-3 pt-4">
                 <Button className="flex-1 bg-primary hover:bg-primary/90">
                   <Video className="w-4 h-4 mr-2" />
-                  Schedule Interview
-                </Button>
-                <Button variant="outline" className="flex-1 border-primary/30 hover:bg-primary/10 bg-transparent">
-                  <MessageSquare className="w-4 h-4 mr-2" />
-                  Message
+                  Join Meeting
                 </Button>
               </div>
             </div>
@@ -667,7 +617,7 @@ export default function ClientDashboard() {
 
       {/* AI Matching Analysis Dialog */}
       <Dialog open={!!selectedMatching} onOpenChange={() => setSelectedMatching(null)}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[90rem] w-[150vw] max-h-[95vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Brain className="w-5 h-5 text-primary" />
@@ -677,15 +627,68 @@ export default function ClientDashboard() {
           </DialogHeader>
           {selectedMatching && (
             <div className="space-y-6">
+              {/* Caregiver Summary */}
+              <div className="flex items-center gap-3 p-3 border rounded-lg bg-muted/30">
+                <Avatar className="w-12 h-12 border-2 border-primary/20">
+                  <AvatarImage
+                    src={(matchedCaregivers.find((c) => c.name === selectedMatching.caregiver)?.avatar) || "/placeholder.svg"}
+                    alt={selectedMatching.caregiver}
+                  />
+                  <AvatarFallback className="bg-primary/10 text-primary">
+                    {selectedMatching.caregiver.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <div className="font-semibold text-foreground">{selectedMatching.caregiver}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {(matchedCaregivers.find((c) => c.name === selectedMatching.caregiver)?.role) || "Caregiver"}
+                    {" • "}
+                    {(matchedCaregivers.find((c) => c.name === selectedMatching.caregiver)?.location) || "Location N/A"}
+                  </div>
+                </div>
+              </div>
+
               {/* Overall Score */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
-                  <p className="text-xs text-muted-foreground mb-1">Match Score</p>
+                  <p className="text-xs text-muted-foreground mb-1">Match Score (%)</p>
                   <div className="text-3xl font-bold text-primary">{selectedMatching.matchScore}%</div>
                 </div>
                 <div className="p-4 bg-secondary/5 rounded-lg border border-secondary/20">
-                  <p className="text-xs text-muted-foreground mb-1">Trust Score</p>
+                  <p className="text-xs text-muted-foreground mb-1">Trust Score (0–100)</p>
                   <div className="text-3xl font-bold text-secondary">{selectedMatching.trustScore}</div>
+                </div>
+                <div className="p-4 bg-background rounded-lg border border-muted">
+                  <p className="text-xs text-muted-foreground mb-1">Recommendation</p>
+                  <Badge className="bg-primary/10 text-primary text-sm py-1 px-2">{selectedMatching.recommendedAction}</Badge>
+                </div>
+              </div>
+
+              {/* Quick Facts */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="p-3 rounded-lg border bg-muted/30">
+                  <p className="text-[11px] text-muted-foreground">Role</p>
+                  <p className="text-sm font-semibold text-foreground">
+                    {matchedCaregivers.find((c) => c.name === selectedMatching.caregiver)?.role || "—"}
+                  </p>
+                </div>
+                <div className="p-3 rounded-lg border bg-muted/30">
+                  <p className="text-[11px] text-muted-foreground">Location</p>
+                  <p className="text-sm font-semibold text-foreground">
+                    {matchedCaregivers.find((c) => c.name === selectedMatching.caregiver)?.location || "—"}
+                  </p>
+                </div>
+                <div className="p-3 rounded-lg border bg-muted/30">
+                  <p className="text-[11px] text-muted-foreground">Experience</p>
+                  <p className="text-sm font-semibold text-foreground">
+                    {matchedCaregivers.find((c) => c.name === selectedMatching.caregiver)?.experience || "—"}
+                  </p>
+                </div>
+                <div className="p-3 rounded-lg border bg-muted/30">
+                  <p className="text-[11px] text-muted-foreground">Availability</p>
+                  <p className="text-sm font-semibold text-foreground">
+                    {matchedCaregivers.find((c) => c.name === selectedMatching.caregiver)?.availability || "—"}
+                  </p>
                 </div>
               </div>
 
@@ -705,6 +708,43 @@ export default function ClientDashboard() {
                       <Progress value={factor.score} className="h-2" />
                     </div>
                   ))}
+                </div>
+              </div>
+
+              {/* Strengths & Considerations */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-foreground">Top Strengths</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedMatching.compatibilityFactors
+                      .slice()
+                      .sort((a, b) => b.score - a.score)
+                      .slice(0, 3)
+                      .map((factor) => (
+                        <Badge key={factor.factor} className="bg-primary/10 text-primary">
+                          {factor.factor} • {factor.score}%
+                        </Badge>
+                      ))}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-foreground">Considerations</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedMatching.compatibilityFactors
+                      .slice()
+                      .sort((a, b) => a.score - b.score)
+                      .slice(0, 2)
+                      .map((factor) => (
+                        <Badge key={factor.factor} className="bg-secondary/10 text-secondary">
+                          {factor.factor} • {factor.score}%
+                        </Badge>
+                      ))}
+                    {selectedMatching.riskFactors.length > 0 && (
+                      <Badge className="bg-secondary/10 text-secondary">
+                        {selectedMatching.riskFactors[0]}
+                      </Badge>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -732,28 +772,7 @@ export default function ClientDashboard() {
                 </div>
               )}
 
-              {/* Recommendation */}
-              <div className="border-t pt-4 space-y-3">
-                <h4 className="font-semibold text-foreground flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-primary" />
-                  Recommendation
-                </h4>
-                <Badge className="bg-primary text-primary-foreground text-base py-2 px-3">
-                  {selectedMatching.recommendedAction}
-                </Badge>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex gap-3 pt-4">
-                <Button className="flex-1 bg-primary hover:bg-primary/90">
-                  <Video className="w-4 h-4 mr-2" />
-                  Schedule Interview
-                </Button>
-                <Button variant="outline" className="flex-1 border-primary/30 hover:bg-primary/10 bg-transparent">
-                  <MessageSquare className="w-4 h-4 mr-2" />
-                  Message Caregiver
-                </Button>
-              </div>
+              
             </div>
           )}
         </DialogContent>
