@@ -99,6 +99,7 @@ export default function RecruiterDashboard() {
                 jobSources={jobSources}
                 integrations={platformIntegrations}
                 workflowSteps={integrationWorkflowSteps}
+                availablePlatforms={availablePlatforms}
                 onConnectClick={() => setShowConnectDialog(true)}
               />
             )}

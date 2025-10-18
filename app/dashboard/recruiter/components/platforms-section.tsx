@@ -1,471 +1,540 @@
 "use client"
 
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useMemo, useState } from "react"
+import {
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  Filter,
+  Link2,
+  ListChecks,
+  Play,
+  Sparkles,
+  Users,
+} from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Progress } from "@/components/ui/progress"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import {
-  Check,
-  CheckCircle2,
-  Clock,
-  Filter,
-  Link2,
-  Plus,
-  RefreshCcw,
-  Users,
-} from "lucide-react"
-import type {
-  CandidatePipelineStatus,
-  IntegrationWorkflowStep,
-  JobSource,
-  PlatformFilterType,
-  PlatformIntegration,
-} from "../types"
+import type { AvailablePlatform, IntegrationWorkflowStep, JobSource, PlatformIntegration } from "../types"
 
 interface PlatformsSectionProps {
   jobSources: JobSource[]
   integrations: PlatformIntegration[]
   workflowSteps: IntegrationWorkflowStep[]
   onConnectClick: () => void
+  availablePlatforms?: AvailablePlatform[]
 }
 
-type IntegrationRuntime = PlatformIntegration & {
-  isSyncing: boolean
-  syncProgress: number
-}
+export function PlatformsSection({ jobSources, integrations, workflowSteps, onConnectClick, availablePlatforms = [] }: PlatformsSectionProps) {
+  const [activeStepIndex, setActiveStepIndex] = useState(0)
+  const [selectedPlatformId, setSelectedPlatformId] = useState<JobSource["id"] | null>(jobSources[0]?.id ?? null)
 
-const candidateStatusStyles: Record<CandidatePipelineStatus, string> = {
-  New: "bg-blue-500/10 text-blue-600 border-blue-500/20",
-  Filtered: "bg-amber-500/10 text-amber-600 border-amber-500/20",
-  Ready: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
-  Imported: "bg-purple-500/10 text-purple-600 border-purple-500/20",
-}
+  const currentIntegration = useMemo(() => {
+    if (selectedPlatformId == null) return null
+    return integrations.find((i) => i.platformId === selectedPlatformId) ?? null
+  }, [integrations, selectedPlatformId])
 
-const filterTypeStyles: Record<PlatformFilterType, string> = {
-  include: "bg-green-500/10 text-green-600 border-green-500/20",
-  exclude: "bg-red-500/10 text-red-600 border-red-500/20",
-  limit: "bg-blue-500/10 text-blue-600 border-blue-500/20",
-}
+  const connectedPlatforms = jobSources.filter((s) => s.connected)
+  const availableToConnect = availablePlatforms
 
-export function PlatformsSection({
-  jobSources,
-  integrations,
-  workflowSteps,
-  onConnectClick,
-}: PlatformsSectionProps) {
-  const [selectedPlatformId, setSelectedPlatformId] = useState<number | null>(jobSources[0]?.id ?? null)
-  const [integrationState, setIntegrationState] = useState<Record<number, IntegrationRuntime>>(() => {
-    const map: Record<number, IntegrationRuntime> = {}
-    const denominator = Math.max(workflowSteps.length, 1)
-    integrations.forEach((integration) => {
-      map[integration.platformId] = {
-        ...integration,
-        isSyncing: false,
-        syncProgress: Math.round((integration.completionStep / denominator) * 100),
-      }
-    })
-    return map
-  })
-  const timeoutsRef = useRef<NodeJS.Timeout[]>([])
+  const stepIcons = [Link2, Filter, Users, ListChecks]
 
-  useEffect(() => {
-    return () => {
-      timeoutsRef.current.forEach(clearTimeout)
-    }
-  }, [])
-
-  const selectedSource = useMemo(
-    () => jobSources.find((source) => source.id === selectedPlatformId),
-    [jobSources, selectedPlatformId],
-  )
-
-  const selectedIntegration = selectedPlatformId ? integrationState[selectedPlatformId] : null
-  const stepCount = workflowSteps.length || 1
-  const completedSteps = selectedIntegration ? Math.min(selectedIntegration.completionStep, stepCount) : 0
-  const displayProgress = selectedIntegration ? selectedIntegration.syncProgress : 0
-
-  const candidateStats = useMemo(() => {
-    if (!selectedIntegration) {
-      return { total: 0, ready: 0, imported: 0, filtered: 0 }
-    }
-    return {
-      total: selectedIntegration.candidates.length,
-      ready: selectedIntegration.candidates.filter((candidate) => candidate.status === "Ready").length,
-      imported: selectedIntegration.candidates.filter((candidate) => candidate.status === "Imported").length,
-      filtered: selectedIntegration.candidates.filter((candidate) => candidate.status === "Filtered").length,
-    }
-  }, [selectedIntegration])
-
-  const handleSelectPlatform = (platformId: number) => {
-    setSelectedPlatformId(platformId)
-  }
-
-  const handleCandidateImport = (candidateId: number) => {
-    if (!selectedPlatformId) return
-    setIntegrationState((prev) => {
-      const current = prev[selectedPlatformId]
-      if (!current) return prev
-      const updatedCandidates = current.candidates.map((candidate) =>
-        candidate.id === candidateId ? { ...candidate, status: "Imported" } : candidate,
-      )
-      return {
-        ...prev,
-        [selectedPlatformId]: {
-          ...current,
-          candidates: updatedCandidates,
-        },
-      }
-    })
-  }
-
-  const handleSync = () => {
-    if (!selectedPlatformId) return
-    const platformId = selectedPlatformId
-
-    timeoutsRef.current.forEach(clearTimeout)
-    timeoutsRef.current = []
-
-    setIntegrationState((prev) => {
-      const current = prev[platformId]
-      if (!current) return prev
-      return {
-        ...prev,
-        [platformId]: {
-          ...current,
-          isSyncing: true,
-          syncProgress: Math.max(current.syncProgress, 10),
-        },
-      }
-    })
-
-    const checkpoints = [35, 60, 85, 100]
-    checkpoints.forEach((progress, index) => {
-      const timeout = setTimeout(() => {
-        setIntegrationState((prev) => {
-          const current = prev[platformId]
-          if (!current) return prev
-          const isFinal = progress === 100
-          const inferredStep = Math.max(
-            current.completionStep,
-            Math.min(stepCount, Math.ceil((progress / 100) * stepCount)),
-          )
-          return {
-            ...prev,
-            [platformId]: {
-              ...current,
-              isSyncing: !isFinal,
-              syncProgress: progress,
-              completionStep: isFinal ? stepCount : inferredStep,
-              lastSync: isFinal ? "Moments ago" : current.lastSync,
-              nextSync: isFinal ? "Auto-sync tonight at 11:00 PM" : current.nextSync,
-              candidates: isFinal
-                ? current.candidates.map((candidate) =>
-                    candidate.status === "Imported"
-                      ? candidate
-                      : { ...candidate, status: candidate.status === "Ready" ? "Imported" : candidate.status },
-                  )
-                : current.candidates,
-            },
-          }
-        })
-      }, (index + 1) * 600)
-      timeoutsRef.current.push(timeout)
-    })
-  }
+  const goNext = () => setActiveStepIndex((i) => Math.min(i + 1, workflowSteps.length - 1))
+  const goPrev = () => setActiveStepIndex((i) => Math.max(i - 1, 0))
 
   return (
-    <div className="animate-in fade-in duration-300 space-y-8">
-      <div>
+    <div className="animate-in fade-in duration-300">
+      <div className="mb-8">
         <h1 className="text-4xl font-bold text-foreground mb-2 flex items-center gap-3">
-          <Link2 className="w-10 h-10 text-primary" />
+          <Sparkles className="w-8 h-8 text-primary" />
           Job Platforms
         </h1>
-        <p className="text-muted-foreground max-w-2xl">
-          Curate caregiver talent from connected platforms, apply tailored filters, and import the best matches into your
-          CareLink network.
-        </p>
+        <p className="text-muted-foreground">Connect, configure, preview, and import candidates in a guided flow.</p>
       </div>
 
-      <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background">
+      <Card className="border-2">
         <CardHeader>
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <div>
-              <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-                <Link2 className="w-5 h-5 text-primary" />
-                Connected Job Platforms
-              </CardTitle>
-              <CardDescription>Choose a source to explore incoming caregiver pipelines.</CardDescription>
-            </div>
-            <Button onClick={onConnectClick} className="bg-primary hover:bg-primary/90">
-              <Plus className="w-4 h-4 mr-2" />
-              Connect New Platform
-            </Button>
-          </div>
+          <CardTitle className="flex items-center gap-2">Workflow</CardTitle>
+          <CardDescription>Follow the steps to integrate platforms without clutter.</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {jobSources.map((source) => {
-              const IconComponent = source.icon
-              const isActive = source.id === selectedPlatformId
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+            {workflowSteps.map((step, idx) => {
+              const Icon = stepIcons[idx] ?? CheckCircle2
+              const isActive = idx === activeStepIndex
+              const isCompleted = idx < activeStepIndex
               return (
-                <Card
-                  key={source.id}
-                  className={`border-2 transition-all ${
-                    isActive
-                      ? "border-primary shadow-lg ring-2 ring-primary/30"
-                      : "hover:border-primary/40 hover:shadow-md"
-                  }`}
+                <button
+                  key={step.id}
+                  className={`text-left rounded-lg border p-4 transition-all hover:shadow-sm ${
+                    isActive ? "border-primary/60 bg-primary/5" : "border-border"
+                  } ${isCompleted ? "opacity-80" : ""}`}
+                  onClick={() => setActiveStepIndex(idx)}
                 >
-                  <button
-                    type="button"
-                    onClick={() => handleSelectPlatform(source.id)}
-                    className="w-full text-left group"
-                  >
-                    <CardContent className="pt-6">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className={`w-12 h-12 ${source.color} rounded-lg flex items-center justify-center transition-transform ${
-                              isActive ? "scale-110" : "group-hover:scale-105"
-                            }`}
-                          >
-                            <IconComponent className="w-6 h-6 text-white" />
-                          </div>
-                          <div>
-                            <h3 className="font-semibold text-lg text-foreground">{source.name}</h3>
-                            {source.connected && (
-                              <Badge className="bg-green-500/10 text-green-600 border-green-500/20 mt-1 flex items-center gap-1">
-                                <CheckCircle2 className="w-3 h-3" />
-                                Connected
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                        <Badge variant="outline" className="text-xs">
-                          Applicants • {source.applicants}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center justify-between text-sm text-muted-foreground">
-                        <span>Sync cadence</span>
-                        <span>{integrationState[source.id]?.nextSync ?? "Manual"}</span>
-                      </div>
-                    </CardContent>
-                  </button>
-                </Card>
+                  <div className="flex items-center gap-3">
+                    <span className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                      isCompleted ? "bg-green-500/10 text-green-600" : isActive ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+                    }`}>
+                      <Icon className="w-5 h-5" />
+                    </span>
+                    <div>
+                      <p className="font-semibold text-foreground">{step.title}</p>
+                      <p className="text-xs text-muted-foreground">{step.description}</p>
+                    </div>
+                  </div>
+                </button>
               )
             })}
+          </div>
+
+          <div className="flex items-center gap-3 mt-4">
+            <Button variant="outline" onClick={goPrev} disabled={activeStepIndex === 0}>
+              <ChevronLeft className="w-4 h-4 mr-1" /> Previous
+            </Button>
+            <Button onClick={goNext} disabled={activeStepIndex === workflowSteps.length - 1}>
+              Next <ChevronRight className="w-4 h-4 ml-1" />
+            </Button>
           </div>
         </CardContent>
       </Card>
 
-      {selectedSource && selectedIntegration && (
-        <div className="grid gap-6 lg:grid-cols-[1.5fr,2fr]">
-          <div className="space-y-6">
-            <Card className="border-2">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <RefreshCcw className="w-5 h-5 text-primary" />
-                  Sync Overview — {selectedSource.name}
-                </CardTitle>
-                <CardDescription>
-                  Review connection health, progress through the workflow, and manage simulated imports.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex flex-wrap items-center gap-3 text-sm">
-                  <Badge variant="outline" className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-primary" />
-                    Last sync: {selectedIntegration.lastSync}
-                  </Badge>
-                  <Badge variant="outline" className="flex items-center gap-2">
-                    <RefreshCcw className="w-4 h-4 text-primary" />
-                    Next sync: {selectedIntegration.nextSync}
-                  </Badge>
-                  <Badge variant="secondary" className="bg-primary/10 text-primary">
-                    {completedSteps} / {stepCount} steps complete
-                  </Badge>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm text-muted-foreground">
-                    <span>Integration completion</span>
-                    <span>{displayProgress}%</span>
-                  </div>
-                  <Progress value={displayProgress} className="h-2" />
-                </div>
-
-                <Button
-                  onClick={handleSync}
-                  className="w-full bg-primary hover:bg-primary/90"
-                  disabled={selectedIntegration.isSyncing}
-                >
-                  <RefreshCcw className={`w-4 h-4 mr-2 ${selectedIntegration.isSyncing ? "animate-spin" : ""}`} />
-                  {selectedIntegration.isSyncing ? "Syncing caregivers..." : "Simulate Import & Sync"}
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="border-2">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Filter className="w-5 h-5 text-primary" />
-                  Filter Strategy
-                </CardTitle>
-                <CardDescription>Guardrails applied before caregivers enter your review queue.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {selectedIntegration.filters.map((filterRule) => (
-                  <div key={filterRule.id} className="rounded-xl border border-border/80 p-4 bg-muted/40">
-                    <div className="flex items-center justify-between gap-2">
-                      <h4 className="text-base font-semibold text-foreground">{filterRule.label}</h4>
-                      <Badge className={filterTypeStyles[filterRule.type]}>
-                        {filterRule.type === "include"
-                          ? "Include"
-                          : filterRule.type === "exclude"
-                          ? "Exclude"
-                          : "Limit"}
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground mt-2">{filterRule.description}</p>
-                    <p className="text-sm font-medium text-foreground mt-3">Value: {filterRule.value}</p>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-
-            <Card className="border-2">
-              <CardHeader>
-                <CardTitle>Workflow Tracker</CardTitle>
-                <CardDescription>Follow each step to bring caregivers into CareLink.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {workflowSteps.map((step, index) => {
-                  const position = index + 1
-                  const isComplete = position <= completedSteps
-                  const isActive =
-                    position === completedSteps + 1 || (completedSteps === stepCount && position === stepCount)
-                  return (
-                    <div key={step.id} className="flex gap-4">
-                      <div
-                        className={`flex h-10 w-10 items-center justify-center rounded-full border-2 ${
-                          isComplete
-                            ? "bg-primary text-primary-foreground border-primary"
-                            : isActive
-                            ? "border-primary text-primary"
-                            : "border-border text-muted-foreground"
-                        }`}
-                      >
-                        {isComplete ? <Check className="w-5 h-5" /> : position}
-                      </div>
-                      <div>
-                        <p className="font-semibold text-foreground">{step.title}</p>
-                        <p className="text-sm text-muted-foreground">{step.description}</p>
-                      </div>
-                    </div>
-                  )
-                })}
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card className="border-2">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between gap-3">
-                <span>Caregiver Feed — {selectedSource.name}</span>
-                <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
-                  <Badge variant="outline">Total {candidateStats.total}</Badge>
-                  <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
-                    Ready {candidateStats.ready}
-                  </Badge>
-                  <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/20">
-                    Filtered {candidateStats.filtered}
-                  </Badge>
-                  <Badge className="bg-purple-500/10 text-purple-600 border-purple-500/20">
-                    Imported {candidateStats.imported}
-                  </Badge>
-                </div>
-              </CardTitle>
-              <CardDescription>
-                Preview qualified caregivers from this platform, adjust statuses, and import them into CareLink.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Tabs defaultValue="feed">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="feed">Candidate Feed</TabsTrigger>
-                  <TabsTrigger value="notes">Platform Notes</TabsTrigger>
-                </TabsList>
-                <TabsContent value="feed">
-                  <ScrollArea className="h-[360px]">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Caregiver</TableHead>
-                          <TableHead>Role & Specialty</TableHead>
-                          <TableHead>Experience</TableHead>
-                          <TableHead>Match</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead className="text-right">Action</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {selectedIntegration.candidates.map((candidate) => (
-                          <TableRow key={candidate.id}>
-                            <TableCell className="font-semibold text-foreground">{candidate.name}</TableCell>
-                            <TableCell>
-                              <div className="flex flex-col">
-                                <span className="text-sm font-medium text-foreground">{candidate.role}</span>
-                                <span className="text-xs text-muted-foreground">{candidate.specialty}</span>
-                                <span className="text-xs text-muted-foreground">{candidate.location}</span>
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-sm text-muted-foreground">{candidate.experience}</TableCell>
-                            <TableCell>
-                              <Badge variant="outline" className="font-semibold">
-                                {candidate.matchScore}%
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <Badge className={candidateStatusStyles[candidate.status]}>{candidate.status}</Badge>
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="border-primary/40 hover:bg-primary/10"
-                                onClick={() => handleCandidateImport(candidate.id)}
-                                disabled={candidate.status === "Imported" || selectedIntegration.isSyncing}
-                              >
-                                {candidate.status === "Imported" ? "Imported" : "Add to CareLink"}
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </ScrollArea>
-                </TabsContent>
-                <TabsContent value="notes" className="space-y-4 text-sm text-muted-foreground">
-                  <p>
-                    Use this panel to document sourcing assumptions, outreach scripts, or region-specific insights for{" "}
-                    <span className="font-semibold text-foreground">{selectedSource.name}</span>. Because this is a static
-                    sandbox, jot down anything your team should remember for future automation.
-                  </p>
-                  <ul className="list-disc pl-5 space-y-2">
-                    <li>Confirm webhook delivery format before moving to production.</li>
-                    <li>Align on SLA for manual reviews when volume spikes.</li>
-                    <li>Capture feedback from recruiters to refine filters quickly.</li>
-                  </ul>
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
-        </div>
+      {activeStepIndex === 0 && (
+        <ConnectStep
+          connected={connectedPlatforms}
+          disconnected={availableToConnect}
+          onConnectClick={onConnectClick}
+          selectedPlatformId={selectedPlatformId}
+          onSelectPlatform={setSelectedPlatformId}
+          currentIntegration={currentIntegration}
+        />
       )}
+
+      {activeStepIndex === 1 && (
+        <FiltersStep
+          platforms={connectedPlatforms}
+          selectedPlatformId={selectedPlatformId}
+          onSelectPlatform={setSelectedPlatformId}
+          integration={currentIntegration}
+        />
+      )}
+
+      {activeStepIndex === 2 && (
+        <PreviewStep
+          platforms={connectedPlatforms}
+          selectedPlatformId={selectedPlatformId}
+          onSelectPlatform={setSelectedPlatformId}
+          integration={currentIntegration}
+        />
+      )}
+
+      {activeStepIndex === 3 && (
+        <ImportStep
+          platforms={connectedPlatforms}
+          selectedPlatformId={selectedPlatformId}
+          onSelectPlatform={setSelectedPlatformId}
+          integration={currentIntegration}
+        />
+      )}
+    </div>
+  )
+}
+
+function PlatformPills({
+  platforms,
+  selectedPlatformId,
+  onSelectPlatform,
+}: {
+  platforms: JobSource[]
+  selectedPlatformId: number | null
+  onSelectPlatform: (id: number) => void
+}) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {platforms.map((p) => (
+        <button
+          key={p.id}
+          className={`px-3 py-1 rounded-full border text-sm transition-all ${
+            selectedPlatformId === p.id ? "bg-primary/10 border-primary/50 text-primary" : "hover:bg-muted"
+          }`}
+          onClick={() => onSelectPlatform(p.id)}
+        >
+          <span className={`inline-block w-2 h-2 rounded-full mr-2 ${p.color}`} />
+          <span className="inline-flex items-center gap-1">
+            {p.icon ? <p.icon className="w-4 h-4" /> : null}
+            <span>{p.name}</span>
+          </span>
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function ConnectStep({
+  connected,
+  disconnected,
+  onConnectClick,
+  selectedPlatformId,
+  onSelectPlatform,
+  currentIntegration,
+}: {
+  connected: JobSource[]
+  disconnected: AvailablePlatform[]
+  onConnectClick: () => void
+  selectedPlatformId: number | null
+  onSelectPlatform: (id: number) => void
+  currentIntegration: PlatformIntegration | null
+}) {
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+      <Card className="border-2 lg:col-span-2">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Link2 className="w-5 h-5 text-primary" /> Connected Platforms
+          </CardTitle>
+          <CardDescription>Select a platform to view integration status.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {connected.length === 0 ? (
+            <div className="text-muted-foreground">No platforms connected yet.</div>
+          ) : (
+            <>
+              <PlatformPills platforms={connected} selectedPlatformId={selectedPlatformId} onSelectPlatform={onSelectPlatform} />
+
+              {currentIntegration ? (
+                <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Card className="border">
+                    <CardHeader>
+                      <CardTitle className="text-base">Sync Status</CardTitle>
+                      <CardDescription>Last and next sync windows</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm text-muted-foreground">Last Sync</p>
+                          <p className="font-semibold">{currentIntegration.lastSync}</p>
+                        </div>
+                        <Badge className="bg-green-500/10 text-green-600 border-green-500/20">Active</Badge>
+                      </div>
+                      <div className="mt-4">
+                        <p className="text-sm text-muted-foreground">Next Sync</p>
+                        <p className="font-semibold">{currentIntegration.nextSync}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="border">
+                    <CardHeader>
+                      <CardTitle className="text-base">Completion</CardTitle>
+                      <CardDescription>Workflow progress for this platform</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center gap-3">
+                        {[1, 2, 3, 4].map((s) => (
+                          <span
+                            key={s}
+                            className={`w-10 h-2 rounded-full ${
+                              s <= currentIntegration.completionStep ? "bg-primary" : "bg-muted"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-3">
+                        Step {currentIntegration.completionStep} of 4 completed
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
+              ) : (
+                <div className="mt-6 text-muted-foreground">Select a connected platform to view details.</div>
+              )}
+            </>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card className="border-2">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">Add Platforms</CardTitle>
+          <CardDescription>Expand your talent sources.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {disconnected.length === 0 ? (
+            <div className="text-muted-foreground">All available platforms are connected.</div>
+          ) : (
+            <div className="space-y-3">
+              {disconnected.map((p) => (
+                <div key={p.id} className="flex items-center justify-between rounded-md border p-3">
+                  <div className="flex items-center gap-3">
+                    <span className={`w-2 h-2 rounded-full ${p.color}`} />
+                    {p.icon ? <p.icon className="w-4 h-4" /> : null}
+                    <span className="font-medium">{p.name}</span>
+                  </div>
+                  <Button size="sm" onClick={onConnectClick}>
+                    Connect
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
+function FiltersStep({
+  platforms,
+  selectedPlatformId,
+  onSelectPlatform,
+  integration,
+}: {
+  platforms: JobSource[]
+  selectedPlatformId: number | null
+  onSelectPlatform: (id: number) => void
+  integration: PlatformIntegration | null
+}) {
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+      <Card className="border-2">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Filter className="w-5 h-5 text-primary" /> Select Platform
+          </CardTitle>
+          <CardDescription>Filters apply per platform.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <PlatformPills platforms={platforms} selectedPlatformId={selectedPlatformId} onSelectPlatform={onSelectPlatform} />
+        </CardContent>
+      </Card>
+
+      <Card className="border-2 lg:col-span-2">
+        <CardHeader>
+          <CardTitle>Configure Filters</CardTitle>
+          <CardDescription>Use guardrails to refine candidate intake.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {!integration ? (
+            <div className="text-muted-foreground">Select a connected platform to configure filters.</div>
+          ) : (
+            <div className="space-y-4">
+              {integration.filters.map((f) => (
+                <div key={f.id} className="rounded-md border p-4">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="font-medium">{f.label}</p>
+                      <p className="text-sm text-muted-foreground">{f.description}</p>
+                    </div>
+                    <Switch defaultChecked={f.type !== "exclude"} />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                    <div className="space-y-2">
+                      <Label htmlFor={`${f.id}-value`}>Value</Label>
+                      <Input id={`${f.id}-value`} defaultValue={f.value} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor={`${f.id}-type`}>Type</Label>
+                      <Input id={`${f.id}-type`} defaultValue={f.type} />
+                    </div>
+                    <div className="flex items-end">
+                      <Button className="w-full">Apply</Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              <div className="flex justify-end">
+                <Button variant="outline">Reset</Button>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
+function PreviewStep({
+  platforms,
+  selectedPlatformId,
+  onSelectPlatform,
+  integration,
+}: {
+  platforms: JobSource[]
+  selectedPlatformId: number | null
+  onSelectPlatform: (id: number) => void
+  integration: PlatformIntegration | null
+}) {
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+      <Card className="border-2">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="w-5 h-5 text-primary" /> Choose Platform
+          </CardTitle>
+          <CardDescription>Preview matched candidates.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <PlatformPills platforms={platforms} selectedPlatformId={selectedPlatformId} onSelectPlatform={onSelectPlatform} />
+        </CardContent>
+      </Card>
+
+      <Card className="border-2 lg:col-span-2">
+        <CardHeader>
+          <CardTitle>Matched Candidates</CardTitle>
+          <CardDescription>Review before import.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {!integration ? (
+            <div className="text-muted-foreground">Select a platform to preview candidates.</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>Experience</TableHead>
+                    <TableHead>Location</TableHead>
+                    <TableHead>Availability</TableHead>
+                    <TableHead>Match</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Action</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {integration.candidates.map((c) => (
+                    <TableRow key={c.id}>
+                      <TableCell className="font-medium">{c.name}</TableCell>
+                      <TableCell>{c.role}</TableCell>
+                      <TableCell>{c.experience}</TableCell>
+                      <TableCell className="text-muted-foreground">{c.location}</TableCell>
+                      <TableCell>{c.availability}</TableCell>
+                      <TableCell>
+                        <Badge className="bg-primary/10 text-primary border-primary/20">{c.matchScore}%</Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          className={
+                            c.status === "Ready"
+                              ? "bg-green-500/10 text-green-600 border-green-500/20"
+                              : c.status === "Filtered"
+                              ? "bg-yellow-500/10 text-yellow-600 border-yellow-500/20"
+                              : c.status === "Imported"
+                              ? "bg-purple-500/10 text-purple-600 border-purple-500/20"
+                              : "bg-blue-500/10 text-blue-600 border-blue-500/20"
+                          }
+                        >
+                          {c.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button size="sm" variant="outline">
+                            Preview
+                          </Button>
+                          <Button size="sm">Import</Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
+function ImportStep({
+  platforms,
+  selectedPlatformId,
+  onSelectPlatform,
+  integration,
+}: {
+  platforms: JobSource[]
+  selectedPlatformId: number | null
+  onSelectPlatform: (id: number) => void
+  integration: PlatformIntegration | null
+}) {
+  const totalReady = integration?.candidates.filter((c) => c.status === "Ready").length ?? 0
+  const totalFiltered = integration?.candidates.filter((c) => c.status === "Filtered").length ?? 0
+  const totalNew = integration?.candidates.filter((c) => c.status === "New").length ?? 0
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+      <Card className="border-2">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <ListChecks className="w-5 h-5 text-primary" /> Select Platform
+          </CardTitle>
+          <CardDescription>Finalize import.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <PlatformPills platforms={platforms} selectedPlatformId={selectedPlatformId} onSelectPlatform={onSelectPlatform} />
+        </CardContent>
+      </Card>
+
+      <Card className="border-2 lg:col-span-2">
+        <CardHeader>
+          <CardTitle>Import Summary</CardTitle>
+          <CardDescription>Confirm the import and start syncing.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {!integration ? (
+            <div className="text-muted-foreground">Select a platform to view summary.</div>
+          ) : (
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="rounded-lg border p-4">
+                  <p className="text-sm text-muted-foreground">Ready to Import</p>
+                  <p className="text-2xl font-bold">{totalReady}</p>
+                </div>
+                <div className="rounded-lg border p-4">
+                  <p className="text-sm text-muted-foreground">Needs Review</p>
+                  <p className="text-2xl font-bold">{totalFiltered}</p>
+                </div>
+                <div className="rounded-lg border p-4">
+                  <p className="text-sm text-muted-foreground">New</p>
+                  <p className="text-2xl font-bold">{totalNew}</p>
+                </div>
+              </div>
+
+              <div className="rounded-lg border p-4">
+                <p className="font-medium">Sync Options</p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="import-batch">Batch Size</Label>
+                    <Input id="import-batch" defaultValue="25" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="import-schedule">Schedule</Label>
+                    <Input id="import-schedule" defaultValue="Immediate" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="import-notify">Notify Team</Label>
+                    <div className="flex items-center gap-2 h-10">
+                      <Switch defaultChecked />
+                      <span className="text-sm text-muted-foreground">Email summary</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2">
+                <Button variant="outline">Save Draft</Button>
+                <Button>
+                  <Play className="w-4 h-4 mr-2" /> Start Import
+                </Button>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   )
 }

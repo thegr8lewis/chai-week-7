@@ -21,10 +21,10 @@ import type {
 export const jobSources: JobSource[] = [
   { id: 1, name: "Indeed", icon: IndeedIcon, connected: true, applicants: 24, color: "bg-blue-500" },
   { id: 2, name: "Scan123", icon: Scan123Icon, connected: true, applicants: 18, color: "bg-purple-500" },
-  { id: 3, name: "Wellsky", icon: WellskyIcon, connected: true, applicants: 12, color: "bg-teal-500" },
 ]
 
 export const availablePlatforms: AvailablePlatform[] = [
+  { id: 3, name: "Wellsky", icon: WellskyIcon, color: "bg-teal-500" },
   { id: 4, name: "LinkedIn", icon: LinkedInIcon, color: "bg-blue-600" },
   { id: 5, name: "ZipRecruiter", icon: ZipRecruiterIcon, color: "bg-green-500" },
   { id: 6, name: "Monster", icon: MonsterIcon, color: "bg-purple-600" },
