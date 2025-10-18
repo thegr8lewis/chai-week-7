@@ -67,7 +67,7 @@ const documents = [
     status: "Verified",
     uploadDate: "Jan 15, 2025",
     expiryDate: "Jan 15, 2027",
-    verifiedBy: "CareLink AI System",
+    verifiedBy: "NannyCare System",
     fileSize: "2.4 MB",
     color: "text-primary",
     bgColor: "bg-primary/10",

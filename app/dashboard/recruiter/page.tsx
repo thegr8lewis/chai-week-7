@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { Suspense, useEffect, useMemo, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { LayoutDashboard, Link2, Users, Building2 } from "lucide-react"
 import {
@@ -28,7 +28,7 @@ const sidebarItems: SidebarItem[] = [
   { id: "clients", label: "Clients", icon: Building2 },
 ]
 
-export default function RecruiterDashboard() {
+function RecruiterDashboardContent() {
   const router = useRouter()
   const search = useSearchParams()
   const [candidates, setCandidates] = useState(initialApplicants)
@@ -151,5 +151,20 @@ export default function RecruiterDashboard() {
 
       {/* CandidateProfileDialog removed: navigates to dedicated route now */}
     </div>
+  )
+}
+
+export default function RecruiterDashboard() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading dashboard...</p>
+        </div>
+      </div>
+    }>
+      <RecruiterDashboardContent />
+    </Suspense>
   )
 }

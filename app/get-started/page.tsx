@@ -60,7 +60,7 @@ export default function GetStarted() {
             Choose Your Role
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Select the option that best describes you to get started with CareLink AI
+            Select the option that best describes you to get started with NannyCare
           </p>
         </div>
 

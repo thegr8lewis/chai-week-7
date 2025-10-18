@@ -24,7 +24,7 @@ export function HeroSection() {
             <Heart className="w-12 h-12 text-secondary fill-secondary animate-pulse" />
             <Sparkles className="w-5 h-5 text-primary absolute -top-1 -right-1" />
           </div>
-          <h1 className="text-4xl font-bold text-foreground">CareLink AI</h1>
+          <h1 className="text-4xl font-bold text-foreground">NannyCare</h1>
         </div>
 
         {/* Tagline */}

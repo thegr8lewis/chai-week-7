@@ -10,7 +10,7 @@ const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "CareLink AI - Connecting Care Through Intelligence",
+  title: "NannyCare - Connecting Care Through Intelligence",
   description: "Healthcare staffing platform powered by AI for Africa",
   generator: "v0.app",
 }

@@ -46,7 +46,7 @@ export function Header() {
             CL
           </div>
           <span className="hidden sm:inline bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent font-bold">
-            CareLink AI
+            NannyCare
           </span>
         </Link>
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo } from "react"
+import { Suspense, useMemo } from "react"
 import { useParams, useSearchParams, useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Calendar, Heart, Mail, MapPin, Phone, Star, Award, FileText } from "lucide-react"
 import { applicants as initialApplicants } from "../../data"
 
-export default function CandidateProfilePage() {
+function CandidateProfilePageContent() {
   const params = useParams()
   const search = useSearchParams()
   const router = useRouter()
@@ -148,5 +148,20 @@ export default function CandidateProfilePage() {
         </Card>
       </div>
     </div>
+  )
+}
+
+export default function CandidateProfilePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading candidate profile...</p>
+        </div>
+      </div>
+    }>
+      <CandidateProfilePageContent />
+    </Suspense>
   )
 }

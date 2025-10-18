@@ -216,7 +216,7 @@ export function ClientView() {
                 <div className="flex items-center gap-4">
                   <div className="w-28 font-semibold text-foreground">{day.day}</div>
                   <div className="flex-1 grid grid-cols-3 gap-2">
-                    {["Morning", "Afternoon", "Evening"].map((slot) => {
+                    {(["Morning", "Afternoon", "Evening"] as const).map((slot) => {
                       const isAvailable = day.slots.includes(slot)
                       return (
                         <button
