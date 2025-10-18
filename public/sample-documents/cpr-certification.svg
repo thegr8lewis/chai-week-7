@@ -1,0 +1,95 @@
+<svg width="800" height="1100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="800" height="1100" fill="#fef2f2"/>
+  <rect x="20" y="20" width="760" height="1060" fill="white" stroke="#dc2626" stroke-width="4"/>
+
+  <!-- Header -->
+  <text x="400" y="70" font-family="Arial, sans-serif" font-size="28" font-weight="bold" text-anchor="middle" fill="#dc2626">
+    AMERICAN RED CROSS
+  </text>
+  <text x="400" y="110" font-family="Arial, sans-serif" font-size="18" text-anchor="middle" fill="#dc2626">
+    CPR/AED FOR PROFESSIONAL RESCUERS
+  </text>
+  <text x="400" y="140" font-family="Arial, sans-serif" font-size="18" text-anchor="middle" fill="#dc2626">
+    AND HEALTH CARE PROVIDERS
+  </text>
+
+  <!-- Red Cross Symbol -->
+  <rect x="375" y="170" width="50" height="15" fill="#dc2626"/>
+  <rect x="392.5" y="152.5" width="15" height="50" fill="#dc2626"/>
+
+  <!-- Certificate Title -->
+  <text x="400" y="260" font-family="Arial, sans-serif" font-size="24" font-weight="bold" text-anchor="middle" fill="#1f2937">
+    CERTIFICATE OF COMPLETION
+  </text>
+
+  <!-- Certificate Body -->
+  <text x="400" y="320" font-family="Arial, sans-serif" font-size="18" text-anchor="middle" fill="#1f2937">
+    This certifies that:
+  </text>
+
+  <text x="400" y="370" font-family="Arial, sans-serif" font-size="26" font-weight="bold" text-anchor="middle" fill="#dc2626">
+    SARAH JOHNSON
+  </text>
+
+  <text x="400" y="420" font-family="Arial, sans-serif" font-size="18" text-anchor="middle" fill="#1f2937">
+    Has successfully completed the training and testing requirements for:
+  </text>
+
+  <rect x="100" y="450" width="600" height="60" fill="#fef2f2" stroke="#dc2626" stroke-width="2"/>
+  <text x="400" y="485" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#dc2626">
+    CPR/AED for Professional Rescuers
+  </text>
+
+  <!-- Dates -->
+  <text x="150" y="560" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#1f2937">
+    Course Completion Date:
+  </text>
+  <text x="450" y="560" font-family="Arial, sans-serif" font-size="18" fill="#1f2937">
+    December 10, 2024
+  </text>
+
+  <text x="150" y="600" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#1f2937">
+    Certificate Valid Until:
+  </text>
+  <text x="450" y="600" font-family="Arial, sans-serif" font-size="18" fill="#16a34a">
+    December 10, 2026
+  </text>
+
+  <!-- Course Includes -->
+  <rect x="60" y="640" width="680" height="180" fill="#f0f9ff" stroke="#dc2626" stroke-width="1"/>
+  <text x="100" y="675" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#1f2937">
+    Course Includes:
+  </text>
+  <text x="120" y="705" font-family="Arial, sans-serif" font-size="15" fill="#1f2937">
+    • Adult, Child, and Infant CPR
+  </text>
+  <text x="120" y="735" font-family="Arial, sans-serif" font-size="15" fill="#1f2937">
+    • Automated External Defibrillator (AED)
+  </text>
+  <text x="120" y="765" font-family="Arial, sans-serif" font-size="15" fill="#1f2937">
+    • Professional-level skills and techniques
+  </text>
+  <text x="120" y="795" font-family="Arial, sans-serif" font-size="15" fill="#1f2937">
+    • Emergency oxygen administration
+  </text>
+
+  <!-- Instructor Info -->
+  <text x="100" y="860" font-family="Arial, sans-serif" font-size="15" fill="#1f2937">
+    Instructor: Michael Chen, RN
+  </text>
+  <text x="100" y="890" font-family="Arial, sans-serif" font-size="15" fill="#1f2937">
+    Instructor ID: RC-78945
+  </text>
+  <text x="100" y="920" font-family="Arial, sans-serif" font-size="15" fill="#1f2937">
+    Training Center: City Medical Training Center
+  </text>
+
+  <!-- Certificate ID -->
+  <text x="400" y="980" font-family="Arial, sans-serif" font-size="16" font-weight="bold" text-anchor="middle" fill="#dc2626">
+    Certificate ID: CPR-2024-89234
+  </text>
+  <text x="400" y="1010" font-family="Arial, sans-serif" font-size="14" text-anchor="middle" fill="#6b7280">
+    American Red Cross Official Certification
+  </text>
+</svg>
