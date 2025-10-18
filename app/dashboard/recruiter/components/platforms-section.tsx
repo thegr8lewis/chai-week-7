@@ -19,7 +19,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import type { AvailablePlatform, IntegrationWorkflowStep, JobSource, PlatformIntegration } from "../types"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import type { AvailablePlatform, IntegrationWorkflowStep, JobSource, PlatformCandidate, PlatformIntegration } from "../types"
 
 interface PlatformsSectionProps {
   jobSources: JobSource[]
@@ -32,6 +33,9 @@ interface PlatformsSectionProps {
 export function PlatformsSection({ jobSources, integrations, workflowSteps, onConnectClick, availablePlatforms = [] }: PlatformsSectionProps) {
   const [activeStepIndex, setActiveStepIndex] = useState(0)
   const [selectedPlatformId, setSelectedPlatformId] = useState<JobSource["id"] | null>(jobSources[0]?.id ?? null)
+  const [previewOpen, setPreviewOpen] = useState(false)
+  const [importOpen, setImportOpen] = useState(false)
+  const [selectedPlatformCandidate, setSelectedPlatformCandidate] = useState<PlatformCandidate | null>(null)
 
   const currentIntegration = useMemo(() => {
     if (selectedPlatformId == null) return null
@@ -128,6 +132,14 @@ export function PlatformsSection({ jobSources, integrations, workflowSteps, onCo
           selectedPlatformId={selectedPlatformId}
           onSelectPlatform={setSelectedPlatformId}
           integration={currentIntegration}
+          onPreview={(c) => {
+            setSelectedPlatformCandidate(c)
+            setPreviewOpen(true)
+          }}
+          onImport={(c) => {
+            setSelectedPlatformCandidate(c)
+            setImportOpen(true)
+          }}
         />
       )}
 
@@ -139,6 +151,80 @@ export function PlatformsSection({ jobSources, integrations, workflowSteps, onCo
           integration={currentIntegration}
         />
       )}
+
+      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Candidate Preview</DialogTitle>
+            <DialogDescription>Review details before taking action.</DialogDescription>
+          </DialogHeader>
+          {selectedPlatformCandidate ? (
+            <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <p className="text-muted-foreground">Name</p>
+                  <p className="font-medium">{selectedPlatformCandidate.name}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Role</p>
+                  <p className="font-medium">{selectedPlatformCandidate.role}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Experience</p>
+                  <p className="font-medium">{selectedPlatformCandidate.experience}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Location</p>
+                  <p className="font-medium">{selectedPlatformCandidate.location}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Availability</p>
+                  <p className="font-medium">{selectedPlatformCandidate.availability}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Match</p>
+                  <p className="font-medium">{selectedPlatformCandidate.matchScore}%</p>
+                </div>
+              </div>
+              <div>
+                <Badge className="bg-muted text-foreground">{selectedPlatformCandidate.status}</Badge>
+              </div>
+            </div>
+          ) : null}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPreviewOpen(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={importOpen} onOpenChange={setImportOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Import Candidate</DialogTitle>
+            <DialogDescription>Confirm importing this candidate into your network.</DialogDescription>
+          </DialogHeader>
+          {selectedPlatformCandidate ? (
+            <div className="space-y-3 text-sm">
+              <p className="font-medium">{selectedPlatformCandidate.name}</p>
+              <p className="text-muted-foreground">{selectedPlatformCandidate.role} • {selectedPlatformCandidate.experience}</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="import-tags">Tags</Label>
+                  <Input id="import-tags" placeholder="e.g., critical-care, bilingual" />
+                </div>
+                <div>
+                  <Label htmlFor="import-notes">Notes</Label>
+                  <Input id="import-notes" placeholder="Optional notes" />
+                </div>
+              </div>
+            </div>
+          ) : null}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setImportOpen(false)}>Cancel</Button>
+            <Button onClick={() => setImportOpen(false)}>Confirm Import</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
@@ -361,11 +447,15 @@ function PreviewStep({
   selectedPlatformId,
   onSelectPlatform,
   integration,
+  onPreview,
+  onImport,
 }: {
   platforms: JobSource[]
   selectedPlatformId: number | null
   onSelectPlatform: (id: number) => void
   integration: PlatformIntegration | null
+  onPreview: (c: PlatformCandidate) => void
+  onImport: (c: PlatformCandidate) => void
 }) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
@@ -432,10 +522,10 @@ function PreviewStep({
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
-                          <Button size="sm" variant="outline">
+                          <Button size="sm" variant="outline" onClick={() => onPreview(c)}>
                             Preview
                           </Button>
-                          <Button size="sm">Import</Button>
+                          <Button size="sm" onClick={() => onImport(c)}>Import</Button>
                         </div>
                       </TableCell>
                     </TableRow>
