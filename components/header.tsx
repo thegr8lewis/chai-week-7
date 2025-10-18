@@ -3,21 +3,37 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Menu, X, Home, LayoutDashboard } from "lucide-react"
-import { useState } from "react"
+import { Menu, X, LayoutDashboard, LogOut } from "lucide-react"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 
 export function Header() {
   const pathname = usePathname()
+  const router = useRouter()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [currentRole, setCurrentRole] = useState<string | null>(null)
+
+  // Detect current role from pathname
+  useEffect(() => {
+    if (pathname.startsWith("/dashboard/recruiter")) {
+      setCurrentRole("recruiter")
+    } else if (pathname.startsWith("/dashboard/caregiver")) {
+      setCurrentRole("caregiver")
+    } else if (pathname.startsWith("/dashboard/client")) {
+      setCurrentRole("client")
+    } else {
+      setCurrentRole(null)
+    }
+  }, [pathname])
 
   const isActive = (path: string) => pathname === path || pathname.startsWith(path + "/")
 
-  const navItems = [
-    { href: "/", label: "Home", icon: Home },
-    { href: "/dashboard/recruiter", label: "Recruiter", icon: LayoutDashboard },
-    { href: "/dashboard/caregiver", label: "Caregiver", icon: LayoutDashboard },
-    { href: "/dashboard/client", label: "Client", icon: LayoutDashboard },
-  ]
+  // No nav items - clean navbar
+  const navItems: any[] = []
+
+  const handleLogout = () => {
+    router.push("/")
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
@@ -57,15 +73,37 @@ export function Header() {
         </nav>
 
         <div className="hidden md:flex items-center gap-3">
-          <Button
-            variant="outline"
-            className="border-primary/30 hover:bg-primary/10 bg-transparent rounded-lg transition-all duration-300"
-          >
-            Sign In
-          </Button>
-          <Button className="bg-gradient-to-r from-primary to-secondary hover:shadow-lg rounded-lg transition-all duration-300">
-            Get Started
-          </Button>
+          {currentRole ? (
+            <>
+              <span className="text-sm text-muted-foreground capitalize">
+                {currentRole} Portal
+              </span>
+              <Button
+                variant="outline"
+                className="border-primary/30 hover:bg-primary/10 bg-transparent rounded-lg transition-all duration-300 gap-2"
+                onClick={handleLogout}
+              >
+                <LogOut className="w-4 h-4" />
+                Logout
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link href="/login">
+                <Button
+                  variant="outline"
+                  className="border-primary/30 hover:bg-primary/10 bg-transparent rounded-lg transition-all duration-300"
+                >
+                  Sign In
+                </Button>
+              </Link>
+              <Link href="/get-started">
+                <Button className="bg-gradient-to-r from-primary to-secondary hover:shadow-lg rounded-lg transition-all duration-300">
+                  Get Started
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
 
         <button
@@ -99,15 +137,40 @@ export function Header() {
               )
             })}
             <div className="pt-4 border-t border-border/40 space-y-2">
-              <Button
-                variant="outline"
-                className="w-full border-primary/30 hover:bg-primary/10 bg-transparent rounded-lg transition-all duration-300"
-              >
-                Sign In
-              </Button>
-              <Button className="w-full bg-gradient-to-r from-primary to-secondary rounded-lg transition-all duration-300">
-                Get Started
-              </Button>
+              {currentRole ? (
+                <>
+                  <div className="text-center text-sm text-muted-foreground capitalize py-2">
+                    {currentRole} Portal
+                  </div>
+                  <Button
+                    variant="outline"
+                    className="w-full border-primary/30 hover:bg-primary/10 bg-transparent rounded-lg transition-all duration-300 gap-2"
+                    onClick={() => {
+                      setMobileMenuOpen(false)
+                      handleLogout()
+                    }}
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Logout
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
+                    <Button
+                      variant="outline"
+                      className="w-full border-primary/30 hover:bg-primary/10 bg-transparent rounded-lg transition-all duration-300"
+                    >
+                      Sign In
+                    </Button>
+                  </Link>
+                  <Link href="/get-started" onClick={() => setMobileMenuOpen(false)}>
+                    <Button className="w-full bg-gradient-to-r from-primary to-secondary rounded-lg transition-all duration-300">
+                      Get Started
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </nav>
         </div>
