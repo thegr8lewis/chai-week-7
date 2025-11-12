@@ -395,34 +395,34 @@ export default function CaregiverDashboard() {
 
         {/* Tabs */}
         <Tabs defaultValue="timeline" className="w-full">
-          <TabsList className="grid w-full grid-cols-5 bg-muted/50 p-1 rounded-xl">
+          <TabsList className="w-full flex gap-2 overflow-x-auto md:grid md:grid-cols-5 bg-muted/50 p-1 rounded-xl">
             <TabsTrigger 
               value="timeline" 
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg transition-all duration-300 rounded-lg"
+              className="shrink-0 whitespace-nowrap px-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg transition-all duration-300 rounded-lg"
             >
               Timeline
             </TabsTrigger>
             <TabsTrigger 
               value="matches" 
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg transition-all duration-300 rounded-lg"
+              className="shrink-0 whitespace-nowrap px-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg transition-all duration-300 rounded-lg"
             >
               Matches
             </TabsTrigger>
             <TabsTrigger 
               value="documents" 
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg transition-all duration-300 rounded-lg"
+              className="shrink-0 whitespace-nowrap px-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg transition-all duration-300 rounded-lg"
             >
               Documents
             </TabsTrigger>
             <TabsTrigger 
               value="assessment" 
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg transition-all duration-300 rounded-lg"
+              className="shrink-0 whitespace-nowrap px-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg transition-all duration-300 rounded-lg"
             >
               Assessment
             </TabsTrigger>
             <TabsTrigger 
               value="profile" 
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg transition-all duration-300 rounded-lg"
+              className="shrink-0 whitespace-nowrap px-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg transition-all duration-300 rounded-lg"
             >
               Profile
             </TabsTrigger>

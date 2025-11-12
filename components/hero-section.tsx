@@ -39,12 +39,12 @@ export function HeroSection() {
 
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-in fade-in slide-in-from-bottom duration-700 delay-500">
-          <Link href="/dashboard/recruiter">
+          <Link href="/get-started">
             <Button
               size="lg"
               className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
             >
-              View Dashboard
+              Get Started
               <Sparkles className="ml-2 w-5 h-5" />
             </Button>
           </Link>

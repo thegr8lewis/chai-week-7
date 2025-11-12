@@ -97,6 +97,23 @@ function RecruiterDashboardContent() {
         <Sidebar items={sidebarItems} activeSection={activeSection} onSelect={setActiveSection} />
 
         <main className="flex-1 overflow-y-auto">
+          {/* Mobile section switcher */}
+          <div className="lg:hidden sticky top-0 z-20 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+            <div className="container mx-auto px-4 py-3 flex items-center gap-3">
+              <label htmlFor="mobile-section" className="text-sm text-muted-foreground shrink-0">Section</label>
+              <select
+                id="mobile-section"
+                className="flex-1 rounded-md border border-border bg-background px-3 py-2 text-sm"
+                value={activeSection}
+                onChange={(e) => setActiveSection(e.target.value as SidebarItem["id"]) }
+              >
+                {sidebarItems.map((item) => (
+                  <option key={item.id} value={item.id}>{item.label}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
           <div className="container mx-auto px-4 py-8">
             {activeSection === "overview" && (
               <OverviewSection

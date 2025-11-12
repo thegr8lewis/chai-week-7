@@ -218,40 +218,42 @@ export function OverviewSection({
           <CardDescription>Latest recruitment activities and updates</CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Candidate</TableHead>
-                <TableHead>Action</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {recentActivityData.map((activity) => (
-                <TableRow key={activity.id}>
-                  <TableCell className="font-medium">{activity.candidate}</TableCell>
-                  <TableCell>{activity.action}</TableCell>
-                  <TableCell className="text-muted-foreground">{activity.date}</TableCell>
-                  <TableCell>
-                    <Badge
-                      className={
-                        activity.status === "New"
-                          ? "bg-blue-500/10 text-blue-600 border-blue-500/20"
-                          : activity.status === "Pending"
-                          ? "bg-yellow-500/10 text-yellow-600 border-yellow-500/20"
-                          : activity.status === "Verified"
-                          ? "bg-green-500/10 text-green-600 border-green-500/20"
-                          : "bg-purple-500/10 text-purple-600 border-purple-500/20"
-                      }
-                    >
-                      {activity.status}
-                    </Badge>
-                  </TableCell>
+          <div className="overflow-x-auto">
+            <Table className="min-w-[640px]">
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Candidate</TableHead>
+                  <TableHead>Action</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Status</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {recentActivityData.map((activity) => (
+                  <TableRow key={activity.id}>
+                    <TableCell className="font-medium">{activity.candidate}</TableCell>
+                    <TableCell>{activity.action}</TableCell>
+                    <TableCell className="text-muted-foreground">{activity.date}</TableCell>
+                    <TableCell>
+                      <Badge
+                        className={
+                          activity.status === "New"
+                            ? "bg-blue-500/10 text-blue-600 border-blue-500/20"
+                            : activity.status === "Pending"
+                            ? "bg-yellow-500/10 text-yellow-600 border-yellow-500/20"
+                            : activity.status === "Verified"
+                            ? "bg-green-500/10 text-green-600 border-green-500/20"
+                            : "bg-purple-500/10 text-purple-600 border-purple-500/20"
+                        }
+                      >
+                        {activity.status}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
     </div>
