@@ -1,6 +1,9 @@
 "use client"
 
 import { ArrowRight, CheckCircle2, Sparkles, Users, Calendar } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import Link from "next/link"
+
 
 export function HowItWorks() {
   const flows = [
@@ -100,9 +103,15 @@ export function HowItWorks() {
         <div className="mt-16 text-center">
           <div className="inline-block bg-card rounded-2xl border border-border p-8 shadow-lg">
             <p className="text-lg text-muted-foreground mb-4">Ready to see it in action?</p>
-            <p className="text-2xl font-bold text-foreground">
-              Try the interactive demo below <span className="text-primary">↓</span>
-            </p>
+          <Link href="/get-started">
+            <Button
+              size="lg"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+            >
+              Get Started
+              <Sparkles className="ml-2 w-5 h-5" />
+            </Button>
+          </Link>
           </div>
         </div>
       </div>
